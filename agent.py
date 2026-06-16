@@ -33,7 +33,7 @@ Search the web for today's most significant news from THREE regions:
 Focus ONLY on these two categories:
 - 🔬 Technology & Innovation (AI, startups, launches, breakthroughs, policy)
 - 🎭 Culture, Sports & Society (major events, records, notable figures, social trends)
-
+STRICTLY EXCLUDE: politics, elections, government decisions, wars, conflicts, diplomacy, sanctions. If an event is political in nature — skip it entirely.
 For each region, select UP TO 5 most resonant events. "Resonant" means:
 - Wide impact (national, regional or global scale)
 - Surprising or groundbreaking
