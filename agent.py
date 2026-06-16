@@ -30,14 +30,18 @@ Search the web for today's most significant news from THREE regions:
 2. India  
 3. MENA (Middle East & North Africa)
 
-Focus ONLY on these two categories:
-- 🔬 Technology & Innovation (AI, startups, launches, breakthroughs, policy)
-- 🎭 Culture, Sports & Society (major events, records, notable figures, social trends)
-STRICTLY EXCLUDE: politics, elections, government decisions, wars, conflicts, diplomacy, sanctions. If an event is political in nature — skip it entirely.
-For each region, select UP TO 5 most resonant events. "Resonant" means:
-- Wide impact (national, regional or global scale)
-- Surprising or groundbreaking
-- Relevant to current trends
+Focus ONLY on content that inspires lifestyle and entertainment creators:
+- 🎭 Viral moments, celebrity news, fashion, food trends, travel, beauty
+- 🏆 Sports achievements, records, unexpected wins
+- 🔬 Cool tech that changes everyday life (gadgets, apps, AI in real life)
+- ✨ Unusual, funny, or heartwarming human stories
+
+For each region, select UP TO 5 events that would make great Instagram posts or Reels. prioritize:
+- High shareability and wow-factor
+- Relatable to young urban audience
+- Visually interesting stories
+
+STRICTLY EXCLUDE: politics, elections, government, economy, finance, business deals, wars, conflicts, diplomacy, sanctions, GDP, inflation, stock markets.
 
 Format your response EXACTLY like this (keep the structure, use the exact separators):
 
