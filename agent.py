@@ -3,7 +3,7 @@ import smtplib
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 # --- CONFIG ---
 RECIPIENT_EMAIL = os.environ["RECIPIENT_EMAIL"]
@@ -11,71 +11,61 @@ GMAIL_USER = os.environ["GMAIL_USER"]
 GMAIL_APP_PASSWORD = os.environ["GMAIL_APP_PASSWORD"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 
-# Almaty is UTC+5
-from datetime import timezone, timedelta
 almaty_tz = timezone(timedelta(hours=5))
 today = datetime.now(almaty_tz).strftime("%d %B %Y")
 today_ru = datetime.now(almaty_tz).strftime("%d.%m.%Y")
 
 
-def get_digest():
+def get_region_news(region_name, region_desc):
+    """Fetch news for a single region with one web search."""
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
     prompt = f"""Today is {today} (Almaty time, UTC+5).
 
-You are a senior analyst preparing a morning press digest for an executive. 
+Search the web for today's viral and unusual news from {region_desc}.
 
-Search the web for today's most significant news from THREE regions:
-1. China
-2. India  
-3. MENA (Middle East & North Africa)
+You are curating content for Instagram/Reels creators. Include ONLY stories that are:
+- 🎭 Genuinely viral, surprising, or heartwarming
+- 🏆 Sports records or unexpected wins
+- 🔬 Cool tech that visibly changes everyday life
+- ✨ Unusual, funny, or culturally fascinating human stories
 
-Focus ONLY on content that inspires lifestyle and entertainment creators:
-- 🎭 Viral moments, celebrity news, fashion, food trends, travel, beauty
-- 🏆 Sports achievements, records, unexpected wins
-- 🔬 Cool tech that changes everyday life (gadgets, apps, AI in real life)
-- ✨ Unusual, funny, or heartwarming human stories
-
-For each region, select UP TO 5 events that would make great Instagram posts or Reels. prioritize:
-- High shareability and wow-factor
-- Relatable to young urban audience
-- Visually interesting stories
+QUALITY RULE: Only include a story if it truly stands out. If you find 1 strong story — write 1. If you find 3 — write 3. If nothing qualifies today — say so honestly. Never pad the list with weak stories just to fill space. Maximum 5 stories.
 
 STRICTLY EXCLUDE: politics, elections, government, economy, finance, business deals, wars, conflicts, diplomacy, sanctions, GDP, inflation, stock markets.
 
-Format your response EXACTLY like this (keep the structure, use the exact separators):
+Format EXACTLY like this:
 
-===CHINA===
+==={region_name}===
 1. [HEADLINE IN ENGLISH]
 [1-2 sentence summary in English]
 
 [ЗАГОЛОВОК НА РУССКОМ]
 [1-2 предложения на русском]
 
-2. [next event...]
-
-===INDIA===
-[same structure]
-
-===MENA===
-[same structure]
+2. [next story if exists...]
 
 ===END===
 
-If no resonant events found for a region, write:
-No major resonant events found today.
-Значимых событий за сегодня не найдено.
+If nothing qualifies today, write ONLY:
+==={region_name}===
+No standout stories today.
+Достойных историй сегодня нет.
+===END===
 
-Be concise. No preamble. Start directly with ===CHINA==="""
+Start directly with ==={region_name}===. No preamble."""
 
     response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4000,
-        tools=[{"type": "web_search_20250305", "name": "web_search"}],
+        model="claude-haiku-4-5",
+        max_tokens=1500,
+        tools=[{
+            "type": "web_search_20250305",
+            "name": "web_search",
+            "max_uses": 3
+        }],
         messages=[{"role": "user", "content": prompt}]
     )
 
-    # Extract text from response
     result = ""
     for block in response.content:
         if block.type == "text":
@@ -84,27 +74,26 @@ Be concise. No preamble. Start directly with ===CHINA==="""
     return result
 
 
-def parse_digest(raw):
-    """Parse the structured digest into sections."""
-    sections = {"CHINA": "", "INDIA": "", "MENA": ""}
-    current = None
+def parse_region(raw, region_name):
+    """Extract content for a region from raw response."""
+    lines = raw.splitlines()
+    content = []
+    inside = False
 
-    for line in raw.splitlines():
-        if line.strip() == "===CHINA===":
-            current = "CHINA"
-        elif line.strip() == "===INDIA===":
-            current = "INDIA"
-        elif line.strip() == "===MENA===":
-            current = "MENA"
+    for line in lines:
+        if line.strip() == f"==={region_name}===":
+            inside = True
+            continue
         elif line.strip() == "===END===":
-            current = None
-        elif current:
-            sections[current] += line + "\n"
+            inside = False
+            break
+        elif inside:
+            content.append(line)
 
-    return sections
+    return "\n".join(content).strip()
 
 
-def build_email(sections):
+def build_email(china, india, mena):
     body = f"""MORNING PRESS REVIEW | УТРЕННИЙ ОБЗОР ПРЕССЫ
 {today} | {today_ru}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -112,26 +101,26 @@ def build_email(sections):
 🇨🇳 CHINA | КИТАЙ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-{sections["CHINA"].strip()}
+{china}
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🇮🇳 INDIA | ИНДИЯ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-{sections["INDIA"].strip()}
+{india}
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🌍 MENA (Middle East & North Africa) | БЛИЖНИЙ ВОСТОК И СЕВЕРНАЯ АФРИКА
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-{sections["MENA"].strip()}
+{mena}
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Generated automatically | Сформировано автоматически
-Morning Press Review Agent · Almaty UTC+5
+Morning Press Review Agent · Almaty UTC+5 · Mon/Wed/Fri
 """
     return body
 
@@ -153,11 +142,22 @@ def send_email(body):
 
 if __name__ == "__main__":
     print(f"🔍 Fetching news for {today}...")
-    raw = get_digest()
-    print("📋 Parsing digest...")
-    sections = parse_digest(raw)
+
+    print("  → China...")
+    raw_china = get_region_news("CHINA", "China")
+    china = parse_region(raw_china, "CHINA")
+
+    print("  → India...")
+    raw_india = get_region_news("INDIA", "India")
+    india = parse_region(raw_india, "INDIA")
+
+    print("  → MENA...")
+    raw_mena = get_region_news("MENA", "the Middle East and North Africa (MENA region)")
+    mena = parse_region(raw_mena, "MENA")
+
     print("✉️  Building email...")
-    body = build_email(sections)
+    body = build_email(china, india, mena)
+
     print("📤 Sending...")
     send_email(body)
     print("✅ Done!")
