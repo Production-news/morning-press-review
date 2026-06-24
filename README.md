@@ -1,59 +1,73 @@
+[README (1).md](https://github.com/user-attachments/files/29280895/README.1.md)
 # 🌏 Morning Press Review Agent
 
-Автоматический утренний дайджест новостей из Китая, Индии и MENA.
-Отправляется каждый день в **8:00 по времени Алматы**.
+Automated morning news digest covering China, India, and MENA.
+Delivered every **Monday, Wednesday, and Friday at 8:00 AM Almaty time (UTC+5)**.
 
-## Категории новостей
-- 🔬 Технологии и инновации
-- 🎭 Культура, спорт, светская жизнь
+## What It Does
 
----
+Searches the web for viral and lifestyle news from three regions and sends a bilingual
+Russian/English email digest focused on content that inspires Instagram and Reels creators.
 
-## Настройка (один раз)
+**Content categories:**
+- 🎭 Viral moments, celebrity news, fashion, food trends, travel, beauty
+- 🏆 Sports achievements, records, unexpected wins
+- 🔬 Cool tech that changes everyday life
+- ✨ Unusual, funny, or heartwarming human stories
 
-### 1. Получи Gmail App Password
-> Обычный пароль Gmail не подойдёт — нужен специальный "пароль приложения".
+**Strictly excluded:** politics, elections, economy, finance, wars, conflicts, diplomacy.
 
-1. Перейди на [myaccount.google.com/security](https://myaccount.google.com/security)
-2. Включи **двухэтапную аутентификацию** (если не включена)
-3. Найди раздел **"Пароли приложений"** (App Passwords)
-4. Создай новый → выбери "Другое" → назови "Morning Digest"
-5. Скопируй 16-значный пароль (он показывается только один раз!)
+## How It Works
 
-### 2. Добавь секреты в GitHub
+1. Runs automatically on Mon/Wed/Fri at 3:00 AM UTC (8:00 AM Almaty)
+2. Makes 3 separate API calls — one per region (China, India, MENA)
+3. Each call uses up to 3 web searches with quality threshold filtering
+4. Sends a single bilingual email with all regions
 
-В репозитории: **Settings → Secrets and variables → Actions → New repository secret**
+## Setup (one time only)
 
-Добавь 4 секрета:
+### 1. Get Gmail App Password
+Regular Gmail password won't work — you need an App Password.
+1. Go to **myaccount.google.com/security**
+2. Enable **2-Step Verification** if not already on
+3. Search for **"App Passwords"**
+4. Create new → name it "Morning Digest"
+5. Copy the 16-character code (shown only once)
 
-| Название | Значение |
-|----------|----------|
-| `ANTHROPIC_API_KEY` | Твой ключ с console.anthropic.com |
-| `GMAIL_USER` | Твой Gmail адрес (example@gmail.com) |
-| `GMAIL_APP_PASSWORD` | 16-значный пароль из шага 1 |
-| `RECIPIENT_EMAIL` | Email куда слать дайджест |
+### 2. Add GitHub Secrets
+Repository → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
-### 3. Загрузи файлы в репозиторий
+| Secret name | Value |
+|---|---|
+| `ANTHROPIC_API_KEY` | Your key from console.anthropic.com |
+| `GMAIL_USER` | Sender Gmail address |
+| `GMAIL_APP_PASSWORD` | 16-character app password from step 1 |
+| `RECIPIENT_EMAIL` | Email address to receive the digest |
 
-Загрузи в корень репозитория:
-- `agent.py`
-- `.github/workflows/daily-digest.yml`
+### 3. Fund the Anthropic API
+Go to **console.anthropic.com** → **Billing** → add $5 credits.
+At current usage (~$0.05/run × 12 runs/month) — $5 lasts approximately 8 months.
 
-### 4. Протестируй вручную
+### 4. Test manually
+Repository → **Actions** → **Morning Press Review** → **Run workflow**
+If email arrives — everything works. The agent will run automatically from here.
 
-В репозитории: **Actions → Morning Press Review → Run workflow**
-
-Если письмо пришло — всё работает! Дальше агент будет запускаться сам каждое утро в 8:00.
-
----
-
-## Файлы
+## Repository Structure
 
 ```
 morning-press-review/
-├── agent.py                          # Основной скрипт агента
+├── agent.py                      # Main agent script
 ├── .github/
 │   └── workflows/
-│       └── daily-digest.yml          # Расписание запуска
+│       └── daily-digest.yml      # Schedule and workflow config
 └── README.md
 ```
+
+## Cost
+
+| Parameter | Value |
+|---|---|
+| Model | claude-haiku-4-5 |
+| Web searches per run | max 9 (3 per region) |
+| Cost per run | ~$0.03–0.05 |
+| Monthly cost (Mon/Wed/Fri) | ~$0.60 |
