@@ -1,8 +1,3 @@
-Сразу меняем — ошибка предсказуемая, время тратить не стоит. Давай добавим keepalive.
-
-Открой репозиторий `morning-press-review` → папка `.github/workflows/` → создай новый файл `keepalive.yml` со следующим содержимым:
-
-```yaml
 name: Keepalive
 
 on:
@@ -21,6 +16,3 @@ jobs:
           git config user.name "GitHub Action"
           git commit --allow-empty -m "chore: keepalive"
           git push
-```
-
-Создала файл — скажи, подтверждаю следующий шаг.
