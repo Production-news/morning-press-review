@@ -1,0 +1,26 @@
+Сразу меняем — ошибка предсказуемая, время тратить не стоит. Давай добавим keepalive.
+
+Открой репозиторий `morning-press-review` → папка `.github/workflows/` → создай новый файл `keepalive.yml` со следующим содержимым:
+
+```yaml
+name: Keepalive
+
+on:
+  schedule:
+    - cron: '0 12 * * 3'  # каждую среду в 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep repository active
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git commit --allow-empty -m "chore: keepalive"
+          git push
+```
+
+Создала файл — скажи, подтверждаю следующий шаг.
